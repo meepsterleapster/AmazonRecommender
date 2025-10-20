@@ -1,1 +1,7 @@
-/data
+*.db
+*.csv
+
+__pychache__/
+.DS_Store
+
+/data/*

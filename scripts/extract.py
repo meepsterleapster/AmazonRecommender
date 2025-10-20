@@ -30,5 +30,5 @@ print(reviews_df.head())
 print('\n\nBelow is the preview for metadata')
 print(meta_df.head())
 
-meta_df.to_csv('../data/amazon_meta.csv')
-reviews_df.to_csv('../data/amazon_reviews.csv')
+meta_df.to_csv('../data/amazon_meta.csv', index=True)
+reviews_df.to_csv('../data/amazon_reviews.csv', index=True)
