@@ -1,5 +1,7 @@
 # AmazonRecommender
 
+Download data at `https://amazon-reviews-2023.github.io/`
+
 # Initial database setup
 
 Next to /scripts, there should also be a /data folder. Put __meta_Video_Games.jsonl__ and __Video_Games.jsonl__ into the data folder. Do nothing else. Then follow the steps below.
