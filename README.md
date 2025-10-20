@@ -25,7 +25,6 @@ from product_reviews;
 ```
 
 Also, set the output to pretty-print the table with:
-``.mode columns``
-``.headers on``
+``.mode columns`` and ``.headers on``
 
 Then figure out the rest of whatever formatting you want on your own.
