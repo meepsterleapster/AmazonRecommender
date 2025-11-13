@@ -1,5 +1,7 @@
 *.db
 *.csv
+*.env
+*.venv/
 
 __pychache__/
 .DS_Store

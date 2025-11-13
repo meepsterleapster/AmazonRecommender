@@ -2,7 +2,7 @@
 
 Download data at `https://amazon-reviews-2023.github.io/`
 
-# Initial database setup
+## Initial database setup
 
 Next to /scripts, there should also be a /data folder. Put __meta_Video_Games.jsonl__ and __Video_Games.jsonl__ into the data folder. Do nothing else. Then follow the steps below.
 
@@ -30,3 +30,23 @@ Also, set the output to pretty-print the table with:
 ``.mode columns`` and ``.headers on``
 
 Then figure out the rest of whatever formatting you want on your own.
+
+## Python Environment & Dependencies
+
+This project supports uv: fast, modern package manager
+
+```bash
+pip install uv
+uv sync
+uv run main.py
+```
+
+The golden rule is for every `git pull`, you run a `uv sync`! If you do that, you will automatically sync all necessary dependencies for the project.
+
+## Using MongoDB
+
+In order to establish a trusted connection to cloud, you must have proper authentication.
+Speak to Jah about it and he will give you the env variables. 
+
+
+
