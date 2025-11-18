@@ -35,18 +35,23 @@ Then figure out the rest of whatever formatting you want on your own.
 
 This project supports uv: fast, modern package manager
 
+To install uv run:
 ```bash
-pip install uv
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Then try to run this to make sure uv is installed properly.
+```bash
+uv --version
+```
+
+Sync dependencies by running this:
+```bash
 uv sync
-uv run main.py
 ```
 
 The golden rule is for every `git pull`, you run a `uv sync`! If you do that, you will automatically sync all necessary dependencies for the project.
 
-## Using MongoDB
-
-In order to establish a trusted connection to cloud, you must have proper authentication.
-Speak to Jah about it and he will give you the env variables. 
 
 
 
