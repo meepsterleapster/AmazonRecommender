@@ -52,6 +52,20 @@ uv sync
 
 The golden rule is for every `git pull`, you run a `uv sync`! If you do that, you will automatically sync all necessary dependencies for the project.
 
+(Optionally) Select interpreter so you don't have to activate the venv every time.
+
+1. Open the folder that has .venv in VS Code (File → Open Folder).
+
+2. Press: `Ctrl + Shift + P`
+
+3. Type: Python: Select Interpreter
+
+4. Pick the one that looks like:
+
+```bash
+.venv\Scripts\python.exe
+```
+
 
 
 
