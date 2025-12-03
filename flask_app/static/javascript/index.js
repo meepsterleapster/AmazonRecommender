@@ -1,5 +1,5 @@
 const formVotes = {};
-
+const evals = {};
 document.getElementById("submitVotesBtn").addEventListener("click", async () => {
     try {
         const response = await fetch("/api/v1/submit_form", {
@@ -18,6 +18,7 @@ document.getElementById("submitVotesBtn").addEventListener("click", async () => 
             groupsContainer.innerHTML = "";
             let submitbutton = document.getElementById("submitVotesBtn");
             submitbutton.style.display = "none";
+            document.getElementById('submitEvalsBtn').innerText='Submit Evaluations';
             let header = document.getElementById("header");
             header.innerText = "Here are some things you might like:";
             loadRecommendations();
@@ -26,6 +27,33 @@ document.getElementById("submitVotesBtn").addEventListener("click", async () => 
         }
     } catch (err) {
         console.error("Error submitting votes:", err);
+    }
+});
+
+
+document.getElementById("submitEvalsBtn").addEventListener("click", async () => {
+    try {
+        const response = await fetch("/api/v1/submit_evals", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(evals)
+        });
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+            console.log("Evals submitted:", evals);
+            // let groupsContainer = document.getElementById("groupsContainer");
+            // groupsContainer.innerHTML = "";
+            let submitbutton = document.getElementById("submitEvalsBtn");
+            submitbutton.style.display = "none";
+        } else {
+            console.error("Submission failed:", result.message);
+        }
+    } catch (err) {
+        console.error("Error submitting evals:", err);
     }
 });
 
@@ -150,9 +178,6 @@ function createItemCard(item, recs) {
         <p class="item-store"><strong>Store:</strong> ${item.store || "N/A"}</p>
     `;
     card.appendChild(info);
-    if (recs) {
-        return card; // No buttons for initial sample cards
-    }
     // Thumbs buttons
     const buttonDiv = document.createElement("div");
     buttonDiv.className = "item-buttons";
@@ -162,7 +187,8 @@ function createItemCard(item, recs) {
     thumbsUp.textContent = "👍";
     thumbsUp.dataset.asin = item.parent_asin;
     thumbsUp.addEventListener("click", () => {
-        formVotes[item.parent_asin] = "5";
+        if (!recs){formVotes[item.parent_asin] = "5";}
+        else{evals[item.parent_asin] = "5";}
         highlightVote(item.parent_asin, "up");
     });
 
@@ -171,7 +197,8 @@ function createItemCard(item, recs) {
     thumbsDown.textContent = "👎";
     thumbsDown.dataset.asin = item.parent_asin;
     thumbsDown.addEventListener("click", () => {
-        formVotes[item.parent_asin] = "1";
+        if (!recs){formVotes[item.parent_asin] = "1";}
+        else{evals[item.parent_asin] = "1";}
         highlightVote(item.parent_asin, "down");
     });
 
@@ -197,7 +224,8 @@ function populateRecommendations(items) {
 }
 
 async function loadRecommendations() {
-    recs = document.getElementById('recommendationsContainer')
+    let recs = document.getElementById('recommendationsContainer')
+    recs.innerHTML = "<p>Loading recommendations...</p>";    
     try{
         const response = await fetch('/api/v1/get_recs');
         const json = await response.json();
@@ -209,7 +237,7 @@ async function loadRecommendations() {
             console.error("Failed:", json.message);
         }
     } catch (err) {
-        recs.innerHTML = "<p>Loading recommendations...</p>";    
+        recs.innerHTML = "<p>Error loading recommendations...</p>";    
         console.error("Error loading item:", err);
     }
 }
