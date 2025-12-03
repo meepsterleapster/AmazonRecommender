@@ -1,23 +1,40 @@
-async function submit_form(event) {
-    event.preventDefault();
 
-    const form = document.getElementById("userForm");
-    const formData = new FormData(form);
 
-    const jsonData = Object.fromEntries(formData.entries());
 
-    const response = await fetch("/api/v1/submit_form", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(jsonData)
-    });
+const formVotes = {};
 
-    const result = await response.json();
-    document.getElementById("responseMsg").textContent = result.message;
+document.getElementById("submitVotesBtn").addEventListener("click", async () => {
+    try {
+        const response = await fetch("/api/v1/submit_form", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formVotes)
+        });
+
+        const result = await response.json();
+        document.getElementById("responseMsg").textContent = result.message;
+
+        if (result.status === "success") {
+            console.log("Form submitted:", formVotes);
+            let groupsContainer = document.getElementById("groupsContainer");
+            groupsContainer.innerHTML = "";
+            loadRecommendations();
+        } else {
+            console.error("Submission failed:", result.message);
+        }
+    } catch (err) {
+        console.error("Error submitting votes:", err);
+        document.getElementById("responseMsg").textContent = "Error submitting votes!";
+        document.getElementById("responseMsg").style.color = "red";
+    }
+});
+
+async function loadRecommendations() {
+    recs = document.getElementById('recommendationsContainer')
+    recs.innerHTML = "<p>Loading recommendations...</p>";
 }
-
 
 async function loadSample() {
     try {
@@ -26,7 +43,7 @@ async function loadSample() {
         console.log(json);
         if (json.status === "success") {
             console.log("loading sample");
-            populateItemCards(json.data);
+            populateItemCardsByGroup(json.data);
         } else {
             console.error("Failed:", json.message);
         }
@@ -63,7 +80,8 @@ function getBestImage(images) {
     }
     return "no-image.png";
 }
-const formVotes = {};
+
+
 function highlightVote(asin, voteType) {
     const thumbsUp = document.getElementById(asin + "_up");
     const thumbsDown = document.getElementById(asin + "_down");
@@ -79,71 +97,92 @@ function highlightVote(asin, voteType) {
         thumbsDown.style.opacity = 1;
     }
 }
-
-function populateItemCards(items) {
-    const container = document.getElementById("itemContainer");
+function populateItemCardsByGroup(items) {
+    const container = document.getElementById("groupsContainer");
     container.innerHTML = "";
 
+    // Group items by sample_group
+    const groups = {};
     items.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "item-card";
-
-        // Image
-        const imgDiv = document.createElement("div");
-        imgDiv.className = "item-image";
-        const img = document.createElement("img");
-        img.src = getBestImage(item.images);
-        img.alt = "Item image";
-        imgDiv.appendChild(img);
-        card.appendChild(imgDiv);
-
-        // Info
-        const info = document.createElement("div");
-        info.className = "item-info";
-
-        info.innerHTML = `
-            <h2 class="item-title">${item.title || "Untitled"}</h2>
-
-            <p class="item-category"><strong>Main Category:</strong> ${item.main_category || "N/A"}</p>
-
-            <p class="item-rating"><strong>Rating:</strong> ${item.average_rating || "N/A"} 
-                <span>(${item.rating_number || 0} reviews)</span></p>
-
-            <p class="item-price"><strong>Price:</strong> ${item.price || "N/A"}</p>
-            <p class="item-store"><strong>Store:</strong> ${item.store || "N/A"}</p>
-            <p class="item-categories"><strong>Categories:</strong> ${item.categories || "N/A"}</p>
-            <p class="item-parent"><strong>Parent ASIN:</strong> ${item.parent_asin || "N/A"}</p>
-        `;
-        card.appendChild(info);
-
-        // 👍 / 👎 Buttons
-        const buttonDiv = document.createElement("div");
-        buttonDiv.className = "item-buttons";
-
-        const thumbsUp = document.createElement("button");
-        thumbsUp.id = item.parent_asin + "_up";
-        thumbsUp.textContent = "👍";
-        thumbsUp.dataset.asin = item.parent_asin;
-        thumbsUp.addEventListener("click", () => {
-            formVotes[item.parent_asin] = "up";   // store in form object
-            console.log("Thumbs Up:", item.parent_asin, formVotes);
-            highlightVote(item.parent_asin, "up"); // optional visual feedback
-        });
-
-        const thumbsDown = document.createElement("button");
-        thumbsDown.id = item.parent_asin + "_down";
-        thumbsDown.textContent = "👎";
-        thumbsDown.dataset.asin = item.parent_asin;
-        thumbsDown.addEventListener("click", () => {
-            formVotes[item.parent_asin] = "down"; // store in form object
-            console.log("Thumbs Down:", item.parent_asin, formVotes);
-            highlightVote(item.parent_asin, "down"); // optional visual feedback
-        });
-
-        buttonDiv.appendChild(thumbsUp);
-        buttonDiv.appendChild(thumbsDown);
-        card.appendChild(buttonDiv);
-
-        container.appendChild(card);
+        const group = item.sample_group || "Ungrouped";
+        if (!groups[group]) groups[group] = [];
+        groups[group].push(item);
     });
+
+    Object.entries(groups).forEach(([groupName, groupItems]) => {
+        const groupContainer = document.createElement("div");
+        groupContainer.className = "group-container";
+
+        const title = document.createElement("div");
+        title.className = "group-title";
+        title.textContent = groupName;
+        groupContainer.appendChild(title);
+
+        const scrollRow = document.createElement("div");
+        scrollRow.className = "scroll-row";
+
+        groupItems.forEach(item => {
+            const card = createItemCard(item);
+            scrollRow.appendChild(card);
+        });
+
+        groupContainer.appendChild(scrollRow);
+        container.appendChild(groupContainer);
+    });
+}
+
+
+function createItemCard(item) {
+    const card = document.createElement("div");
+    card.className = "item-card";
+
+    // Image
+    const imgDiv = document.createElement("div");
+    imgDiv.className = "item-image";
+    const img = document.createElement("img");
+    img.src = getBestImage(item.images);
+    img.alt = "Item image";
+    imgDiv.appendChild(img);
+    card.appendChild(imgDiv);
+
+    // Info
+    const info = document.createElement("div");
+    info.className = "item-info";
+    info.innerHTML = `
+        <h2 class="item-title">${item.title || "Untitled"}</h2>
+        <p class="item-category"><strong>Main Category:</strong> ${item.main_category || "N/A"}</p>
+        <p class="item-rating"><strong>Rating:</strong> ${item.average_rating || "N/A"} 
+            <span>(${item.rating_number || 0} reviews)</span></p>
+        <p class="item-price"><strong>Price:</strong> ${item.price || "N/A"}</p>
+        <p class="item-store"><strong>Store:</strong> ${item.store || "N/A"}</p>
+    `;
+    card.appendChild(info);
+
+    // Thumbs buttons
+    const buttonDiv = document.createElement("div");
+    buttonDiv.className = "item-buttons";
+
+    const thumbsUp = document.createElement("button");
+    thumbsUp.id = item.parent_asin + "_up";
+    thumbsUp.textContent = "👍";
+    thumbsUp.dataset.asin = item.parent_asin;
+    thumbsUp.addEventListener("click", () => {
+        formVotes[item.parent_asin] = "1";
+        highlightVote(item.parent_asin, "up");
+    });
+
+    const thumbsDown = document.createElement("button");
+    thumbsDown.id = item.parent_asin + "_down";
+    thumbsDown.textContent = "👎";
+    thumbsDown.dataset.asin = item.parent_asin;
+    thumbsDown.addEventListener("click", () => {
+        formVotes[item.parent_asin] = "-1";
+        highlightVote(item.parent_asin, "down");
+    });
+
+    buttonDiv.appendChild(thumbsUp);
+    buttonDiv.appendChild(thumbsDown);
+    card.appendChild(buttonDiv);
+
+    return card;
 }

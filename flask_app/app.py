@@ -41,16 +41,6 @@ def query_db(query, args=(), action='get'):
     return response
 
 
-user_df = pd.DataFrame(columns=[
-    "firstname",
-    "lastname",
-    "goal",
-    "age",
-    "experience",
-    "style",
-    "time_commitment"
-])
-
 all_samples = pd.read_csv('../data/amazon_product_samples.csv')
 all_samples.fillna('', inplace=True)
 df_clean = all_samples.where(pd.notnull(all_samples), None)
@@ -77,6 +67,12 @@ def get_samples():
             "message": "Failed to retrieve samples",
             "error": str(e)
         })
+    
+
+user_df = pd.DataFrame(columns=[
+    "parent_asin",
+    "rating"
+])
 
 
 @app.route('/api/v1/submit_form', methods=['POST'])
@@ -87,8 +83,12 @@ def submit_form():
     try:
         global user_df
 
-        new_row = pd.DataFrame([response])
-        user_df = pd.concat([user_df, new_row], ignore_index=True)
+        new_rows = pd.DataFrame([
+            {"parent_asin": asin, "rating": vote}
+            for asin, vote in response.items()
+        ])
+
+        user_df = pd.concat([user_df, new_rows], ignore_index=True)
 
         print("\nCurrent DataFrame:")
         print(user_df)
