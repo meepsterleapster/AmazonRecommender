@@ -162,7 +162,7 @@ function createItemCard(item, recs) {
     thumbsUp.textContent = "👍";
     thumbsUp.dataset.asin = item.parent_asin;
     thumbsUp.addEventListener("click", () => {
-        formVotes[item.parent_asin] = "1";
+        formVotes[item.parent_asin] = "5";
         highlightVote(item.parent_asin, "up");
     });
 
@@ -171,7 +171,7 @@ function createItemCard(item, recs) {
     thumbsDown.textContent = "👎";
     thumbsDown.dataset.asin = item.parent_asin;
     thumbsDown.addEventListener("click", () => {
-        formVotes[item.parent_asin] = "-1";
+        formVotes[item.parent_asin] = "1";
         highlightVote(item.parent_asin, "down");
     });
 

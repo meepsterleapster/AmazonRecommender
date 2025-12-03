@@ -1,6 +1,7 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify, g
 import pandas as pd
 import sqlite3, os
+from src import rec_engine
 
 DATABASE = '../data/amazon.db'
 
@@ -40,15 +41,21 @@ def query_db(query, args=(), action='get'):
     conn.close()
     return response
 
+def load_dfs():
+    global samples_clean
+    all_samples = pd.read_csv('../data/amazon_product_samples.csv')
+    all_samples.fillna('', inplace=True)
+    samples_clean = all_samples.where(pd.notnull(all_samples), None)
 
-all_samples = pd.read_csv('../data/amazon_product_samples.csv')
-all_samples.fillna('', inplace=True)
-df_clean = all_samples.where(pd.notnull(all_samples), None)
+    global all_products_cleaned
+    all_products = pd.read_csv('../data/cleaned_amazon_products.csv')
+    all_products.fillna('', inplace=True)
+    all_products_cleaned = all_products.where(pd.notnull(all_products), None)
 
 @app.route('/api/v1/get_samples', methods=['GET'])
 def get_samples():
     try:
-        samples = df_clean.to_dict(orient='records')
+        samples = samples_clean.to_dict(orient='records')
         first = samples[0]
         print("First sample:", first['title'])
         print("Samples retrieved successfully.")
@@ -84,7 +91,7 @@ def submit_form():
         global user_df
 
         new_rows = pd.DataFrame([
-            {"parent_asin": asin, "rating": vote}
+            {"parent_asin": asin, "rating": float(vote)}
             for asin, vote in response.items()
         ])
 
@@ -112,13 +119,22 @@ def submit_form():
 @app.route('/api/v1/get_recs', methods=['GET'])
 def get_recs():
     try:
-        recommendations = df_clean.to_dict(orient='records')
+        global user_df
+        print('Getting recommendations...')
+        print('from front end:',user_df)
+        recs = rec_engine.get_recommendations(user_df)
+        rec_asins = [rec[0] for rec in recs]
+        print('Recommended ASINs:', rec_asins)
+        print('getting recommended product details')
+        df_recs = all_products_cleaned[all_products_cleaned['parent_asin'].isin(rec_asins)]
+
+        recommendations = df_recs.to_dict(orient='records')
         print("Recommendations retrieved successfully.")
 
         return jsonify({
             "status": "success",
             "status_code": 200,
-            "data": [recommendations[0], recommendations[1], recommendations[3]]
+            "data": recommendations
         })
 
     except Exception as e:
@@ -139,4 +155,5 @@ def close_connection(exception):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    load_dfs()
+    app.run(debug=False)
