@@ -130,6 +130,11 @@ def get_recs():
 
         recommendations = df_recs.to_dict(orient='records')
         print("Recommendations retrieved successfully.")
+        print('resetting user ratings')
+        user_df = pd.DataFrame(columns=[
+            "parent_asin",
+            "rating"
+        ])
 
         return jsonify({
             "status": "success",
