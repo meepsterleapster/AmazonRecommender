@@ -2,6 +2,7 @@ from flask import Flask, render_template, send_from_directory, request, jsonify,
 import pandas as pd
 import sqlite3, os
 from src import rec_engine
+import time
 
 DATABASE = '../data/amazon.db'
 
@@ -85,7 +86,7 @@ user_df = pd.DataFrame(columns=[
 @app.route('/api/v1/submit_form', methods=['POST'])
 def submit_form():
     response = request.json
-    print("Received form data:", response)
+    print("Received rating data:", response)
 
     try:
         global user_df
@@ -115,6 +116,50 @@ def submit_form():
         'message': 'Form data stored in DataFrame'
     }
 
+evals_df = pd.DataFrame(columns=[
+    "parent_asin",
+    "rating"
+])
+@app.route('/api/v1/submit_evals', methods=['POST'])
+def submit_evals():
+    response = request.json
+    print("Received evals data:", response)
+
+    try:
+        global evals_df
+
+        new_rows = pd.DataFrame([
+            {"parent_asin": asin, "rating": float(rating)}
+            for asin, rating in response.items()
+        ])
+
+        evals_df = pd.concat([evals_df, new_rows], ignore_index=True)
+
+        print("\nEvals DataFrame:")
+        print(evals_df)
+        print('storing evals df for day/time')
+        evals_df.to_csv
+        evals_df.to_csv(f'../data/user_evals/{time.strftime("%Y%m%d-%H%M%S")}.csv', index=False)
+        print('resetting evals df')
+        evals_df = pd.DataFrame(columns=[
+            "parent_asin",
+            "rating"
+        ])
+
+    except Exception as e:
+        print("Error:", e)
+        return {
+            "status": "failure",
+            "status_code": 500,
+            "message": "Failed to store evals in DataFrame",
+            "error": str(e)
+        }
+
+    return {
+        'status': 'success',
+        'status_code': 200,
+        'message': 'Evals data stored in DataFrame'
+    }
 
 @app.route('/api/v1/get_recs', methods=['GET'])
 def get_recs():
