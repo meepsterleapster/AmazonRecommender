@@ -41,14 +41,37 @@ def query_db(query, args=(), action='get'):
     return response
 
 
+all_samples = pd.read_csv('../data/amazon_product_samples.csv')
+all_samples.fillna('', inplace=True)
+df_clean = all_samples.where(pd.notnull(all_samples), None)
+
+@app.route('/api/v1/get_samples', methods=['GET'])
+def get_samples():
+    try:
+        samples = df_clean.to_dict(orient='records')
+        first = samples[0]
+        print("First sample:", first['title'])
+        print("Samples retrieved successfully.")
+
+        return jsonify({
+            "status": "success",
+            "status_code": 200,
+            "data": samples
+        })
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({
+            "status": "failure",
+            "status_code": 500,
+            "message": "Failed to retrieve samples",
+            "error": str(e)
+        })
+    
+
 user_df = pd.DataFrame(columns=[
-    "firstname",
-    "lastname",
-    "goal",
-    "age",
-    "experience",
-    "style",
-    "time_commitment"
+    "parent_asin",
+    "rating"
 ])
 
 
@@ -59,9 +82,13 @@ def submit_form():
 
     try:
         global user_df
-        
-        new_row = pd.DataFrame([response])
-        user_df = pd.concat([user_df, new_row], ignore_index=True)
+
+        new_rows = pd.DataFrame([
+            {"parent_asin": asin, "rating": vote}
+            for asin, vote in response.items()
+        ])
+
+        user_df = pd.concat([user_df, new_rows], ignore_index=True)
 
         print("\nCurrent DataFrame:")
         print(user_df)
@@ -80,6 +107,28 @@ def submit_form():
         'status_code': 200,
         'message': 'Form data stored in DataFrame'
     }
+
+
+@app.route('/api/v1/get_recs', methods=['GET'])
+def get_recs():
+    try:
+        recommendations = df_clean.to_dict(orient='records')
+        print("Recommendations retrieved successfully.")
+
+        return jsonify({
+            "status": "success",
+            "status_code": 200,
+            "data": [recommendations[0], recommendations[1], recommendations[3]]
+        })
+
+    except Exception as e:
+        print("Error:", e)
+        return {
+            "status": "failure",
+            "status_code": 500,
+            "message": "Failed to store data in DataFrame",
+            "error": str(e)
+        }
 
 
 @app.teardown_appcontext
