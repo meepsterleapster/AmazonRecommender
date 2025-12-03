@@ -158,3 +158,10 @@ button:hover {
 .scroll-row::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+.recommendation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}

@@ -1,6 +1,3 @@
-
-
-
 const formVotes = {};
 
 document.getElementById("submitVotesBtn").addEventListener("click", async () => {
@@ -14,27 +11,23 @@ document.getElementById("submitVotesBtn").addEventListener("click", async () => 
         });
 
         const result = await response.json();
-        document.getElementById("responseMsg").textContent = result.message;
 
         if (result.status === "success") {
             console.log("Form submitted:", formVotes);
             let groupsContainer = document.getElementById("groupsContainer");
             groupsContainer.innerHTML = "";
+            let submitbutton = document.getElementById("submitVotesBtn");
+            submitbutton.style.display = "none";
+            let header = document.getElementById("header");
+            header.innerText = "Here are some things you might like:";
             loadRecommendations();
         } else {
             console.error("Submission failed:", result.message);
         }
     } catch (err) {
         console.error("Error submitting votes:", err);
-        document.getElementById("responseMsg").textContent = "Error submitting votes!";
-        document.getElementById("responseMsg").style.color = "red";
     }
 });
-
-async function loadRecommendations() {
-    recs = document.getElementById('recommendationsContainer')
-    recs.innerHTML = "<p>Loading recommendations...</p>";
-}
 
 async function loadSample() {
     try {
@@ -122,7 +115,7 @@ function populateItemCardsByGroup(items) {
         scrollRow.className = "scroll-row";
 
         groupItems.forEach(item => {
-            const card = createItemCard(item);
+            const card = createItemCard(item, recs=false);
             scrollRow.appendChild(card);
         });
 
@@ -132,7 +125,7 @@ function populateItemCardsByGroup(items) {
 }
 
 
-function createItemCard(item) {
+function createItemCard(item, recs) {
     const card = document.createElement("div");
     card.className = "item-card";
 
@@ -157,7 +150,9 @@ function createItemCard(item) {
         <p class="item-store"><strong>Store:</strong> ${item.store || "N/A"}</p>
     `;
     card.appendChild(info);
-
+    if (recs) {
+        return card; // No buttons for initial sample cards
+    }
     // Thumbs buttons
     const buttonDiv = document.createElement("div");
     buttonDiv.className = "item-buttons";
@@ -185,4 +180,36 @@ function createItemCard(item) {
     card.appendChild(buttonDiv);
 
     return card;
+}
+
+function populateRecommendations(items) {
+    const container = document.getElementById("recommendationsContainer");
+    container.innerHTML = "";
+
+    const grid = document.createElement("div");
+    grid.className = "recommendation-grid";
+
+    items.forEach(item => {
+        const card = createItemCard(item, recs=true);
+        grid.appendChild(card);
+    });
+    container.appendChild(grid);
+}
+
+async function loadRecommendations() {
+    recs = document.getElementById('recommendationsContainer')
+    try{
+        const response = await fetch('/api/v1/get_recs');
+        const json = await response.json();
+        console.log(json);
+        if (json.status === "success") {
+            console.log("loading recommendations");
+            populateRecommendations(json.data);
+        } else {
+            console.error("Failed:", json.message);
+        }
+    } catch (err) {
+        recs.innerHTML = "<p>Loading recommendations...</p>";    
+        console.error("Error loading item:", err);
+    }
 }

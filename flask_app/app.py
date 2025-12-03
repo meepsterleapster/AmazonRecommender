@@ -109,6 +109,28 @@ def submit_form():
     }
 
 
+@app.route('/api/v1/get_recs', methods=['GET'])
+def get_recs():
+    try:
+        recommendations = df_clean.to_dict(orient='records')
+        print("Recommendations retrieved successfully.")
+
+        return jsonify({
+            "status": "success",
+            "status_code": 200,
+            "data": [recommendations[0], recommendations[1], recommendations[3]]
+        })
+
+    except Exception as e:
+        print("Error:", e)
+        return {
+            "status": "failure",
+            "status_code": 500,
+            "message": "Failed to store data in DataFrame",
+            "error": str(e)
+        }
+
+
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
