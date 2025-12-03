@@ -46,6 +46,11 @@ button {
     cursor: pointer;
     font-size: 16px;
 }
+.item-buttons button {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
 
 button:hover {
     background: #3b77c5;
@@ -54,4 +59,109 @@ button:hover {
 #responseMsg {
     margin-top: 20px;
     font-weight: bold;
+}
+.item-card {
+    flex: 0 0 200px;           /* don't shrink, fixed 200px width */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.item-card:hover {
+    transform: translateY(-3px);
+}
+
+.item-image img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-title {
+    margin: 0;
+    font-size: 1em;
+    font-weight: bold;
+    color: #333;
+}
+.group-container {
+    margin-bottom: 2rem;
+}
+
+.group-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.item-category,
+.item-rating,
+.item-price,
+.item-store,
+.item-categories,
+.item-details,
+.item-parent {
+    margin: 0;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.item-rating span {
+    color: #888;
+    font-size: 0.75em;
+}
+
+.item-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 6px;
+}
+
+.item-buttons button {
+    opacity: 0.5;
+    padding: 4px 6px;
+    border: none;
+    background: #eee;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s, background 0.2s;
+}
+.scroll-row {
+    display: flex;             /* horizontal layout */
+    flex-wrap: nowrap;         /* no wrapping, keep in one row */
+    overflow-x: auto;          /* horizontal scroll if needed */
+    gap: 10px;                 /* space between cards */
+    padding-bottom: 0.5rem;
+}
+
+.scroll-row::-webkit-scrollbar {
+    height: 8px;
+}
+
+.scroll-row::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.scroll-row::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.recommendation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
 }
