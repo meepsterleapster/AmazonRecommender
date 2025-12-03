@@ -51,6 +51,33 @@ user_df = pd.DataFrame(columns=[
     "time_commitment"
 ])
 
+all_samples = pd.read_csv('../data/amazon_product_samples.csv')
+all_samples.fillna('', inplace=True)
+df_clean = all_samples.where(pd.notnull(all_samples), None)
+
+@app.route('/api/v1/get_samples', methods=['GET'])
+def get_samples():
+    try:
+        samples = df_clean.to_dict(orient='records')
+        first = samples[0]
+        print("First sample:", first['title'])
+        print("Samples retrieved successfully.")
+
+        return jsonify({
+            "status": "success",
+            "status_code": 200,
+            "data": samples
+        })
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({
+            "status": "failure",
+            "status_code": 500,
+            "message": "Failed to retrieve samples",
+            "error": str(e)
+        })
+
 
 @app.route('/api/v1/submit_form', methods=['POST'])
 def submit_form():
@@ -59,7 +86,7 @@ def submit_form():
 
     try:
         global user_df
-        
+
         new_row = pd.DataFrame([response])
         user_df = pd.concat([user_df, new_row], ignore_index=True)
 

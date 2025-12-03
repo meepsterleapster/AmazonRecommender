@@ -6,81 +6,10 @@
     <title>Welcome | Recommender Demo</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="{{ url_for('static', filename='javascript/user.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='javascript/index.js') }}" defer></script>
 </head>
 
-<body>
-    <div class="container">
-        <h1>Welcome!</h1>
-        <p class="subtitle">
-            We'd like to get to know you—your answers help us personalize recommendations and overcome the cold-start problem.
-        </p>
-
-        <form id="userForm" onsubmit="submit_form(event)">
-            <label>
-                First Name
-                <input type="text" name="firstname" required />
-            </label>
-            
-            <label>
-                Last Name
-                <input type="text" name="lastname" required />
-            </label>
-            
-            <label>
-                What are you hoping to get recommendations for?
-                <input type="text" name="goal" placeholder="ex: books, courses, movies, jobs..." required />
-            </label>
-
-            <label>
-                Age Range
-                <select name="age">
-                    <option value="" disabled selected>Select one</option>
-                    <option>Under 18</option>
-                    <option>18-24</option>
-                    <option>25-34</option>
-                    <option>35-44</option>
-                    <option>45+</option>
-                </select>
-            </label>
-
-            <label>
-                Experience Level in Your Domain of Interest
-                <select name="experience">
-                    <option value="" disabled selected>Select one</option>
-                    <option>Beginner</option>
-                    <option>Intermediate</option>
-                    <option>Advanced</option>
-                    <option>Expert</option>
-                </select>
-            </label>
-
-            <label>
-                Preferred Recommendation Style
-                <select name="style">
-                    <option value="" disabled selected>Select one</option>
-                    <option>Popular Picks</option>
-                    <option>Surprising/Novel</option>
-                    <option>Similar to My Past Favorites</option>
-                    <option>Trending Now</option>
-                </select>
-            </label>
-
-            <label>
-                How much time do you typically invest?
-                <select name="time_commitment">
-                    <option value="" disabled selected>Select one</option>
-                    <option>0-2 hours/week</option>
-                    <option>2-5 hours/week</option>
-                    <option>5-10 hours/week</option>
-                    <option>10+ hours/week</option>
-                </select>
-            </label>
-
-            <button type="submit">Submit</button>
-        </form>
-
-        <p id="responseMsg"></p>
-    </div>
+<body onload="loadSample()">
+    <div id="itemContainer"></div>
 </body>
 </html>

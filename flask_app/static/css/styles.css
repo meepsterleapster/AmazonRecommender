@@ -46,6 +46,11 @@ button {
     cursor: pointer;
     font-size: 16px;
 }
+.item-buttons button {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
 
 button:hover {
     background: #3b77c5;
@@ -54,4 +59,58 @@ button:hover {
 #responseMsg {
     margin-top: 20px;
     font-weight: bold;
+}
+
+.item-card {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 15px;
+    max-width: 600px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.item-card:hover {
+    transform: translateY(-5px);
+}
+
+.item-image img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-right: 20px;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.item-title {
+    margin: 0;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.item-category,
+.item-rating,
+.item-price,
+.item-store,
+.item-categories,
+.item-details,
+.item-parent {
+    margin: 4px 0;
+    font-size: 0.95em;
+    color: #555;
+}
+
+.item-rating span {
+    color: #888;
+    font-size: 0.85em;
 }
