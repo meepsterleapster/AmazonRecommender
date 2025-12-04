@@ -1,46 +1,55 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify, g
 import pandas as pd
 import sqlite3, os
+<<<<<<< Updated upstream
+=======
 
-DATABASE = '../data/amazon.db'
+from src import rec_engine
+
+import time
+>>>>>>> Stashed changes
+
+DATABASE = "../data/amazon.db"
 
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
-@app.route('/static/<path:path>')
+@app.route("/static/<path:path>")
 def send_report(path):
-    return send_from_directory('static', path)
+    return send_from_directory("static", path)
 
 
 def get_db():
-    db = getattr(g, '_database', None)
+    db = getattr(g, "_database", None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
 
     def make_dicts(cursor, row):
-        return dict((cursor.description[idx][0], value)
-                    for idx, value in enumerate(row))
+        return dict(
+            (cursor.description[idx][0], value) for idx, value in enumerate(row)
+        )
 
     db.row_factory = make_dicts
     # db.row_factory = sqlite3.Row
     return db
 
 
-def query_db(query, args=(), action='get'):
+def query_db(query, args=(), action="get"):
     db = get_db()
     conn = db.execute(query, args)
     response = conn.fetchall()
-    if action.lower() in ('post'):
+    if action.lower() in ("post"):
         db.commit()
     conn.close()
     return response
 
 
+<<<<<<< Updated upstream
 user_df = pd.DataFrame(columns=[
     "firstname",
     "lastname",
@@ -50,18 +59,72 @@ user_df = pd.DataFrame(columns=[
     "style",
     "time_commitment"
 ])
+=======
+def load_dfs():
+    global samples_clean
+    all_samples = pd.read_csv("../data/amazon_product_samples.csv")
+    all_samples.fillna("", inplace=True)
+    samples_clean = all_samples.where(pd.notnull(all_samples), None)
+    print("HERE")
+    print(samples_clean.head())
+
+    global all_products_cleaned
+    all_products = pd.read_csv("../data/cleaned_amazon_products.csv")
+    all_products.fillna("", inplace=True)
+    all_products_cleaned = all_products.where(pd.notnull(all_products), None)
 
 
-@app.route('/api/v1/submit_form', methods=['POST'])
+load_dfs()
+
+
+@app.route("/api/v1/get_samples", methods=["GET"])
+def get_samples():
+    try:
+        samples = samples_clean.to_dict(orient="records")
+        print("HERE HERE HERE ")
+        print(samples[0])
+        print("Samples retrieved successfully.")
+
+        return jsonify({"status": "success", "status_code": 200, "data": samples})
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(
+            {
+                "status": "failure",
+                "status_code": 500,
+                "message": "Failed to retrieve samples",
+                "error": str(e),
+            }
+        )
+>>>>>>> Stashed changes
+
+
+user_df = pd.DataFrame(columns=["parent_asin", "rating"])
+
+
+@app.route("/api/v1/submit_form", methods=["POST"])
 def submit_form():
     response = request.json
     print("Received form data:", response)
 
     try:
         global user_df
+<<<<<<< Updated upstream
         
         new_row = pd.DataFrame([response])
         user_df = pd.concat([user_df, new_row], ignore_index=True)
+=======
+
+        new_rows = pd.DataFrame(
+            [
+                {"parent_asin": asin, "rating": float(vote)}
+                for asin, vote in response.items()
+            ]
+        )
+
+        user_df = pd.concat([user_df, new_rows], ignore_index=True)
+>>>>>>> Stashed changes
 
         print("\nCurrent DataFrame:")
         print(user_df)
@@ -72,22 +135,109 @@ def submit_form():
             "status": "failure",
             "status_code": 500,
             "message": "Failed to store data in DataFrame",
-            "error": str(e)
+            "error": str(e),
         }
 
     return {
-        'status': 'success',
-        'status_code': 200,
-        'message': 'Form data stored in DataFrame'
+        "status": "success",
+        "status_code": 200,
+        "message": "Form data stored in DataFrame",
+    }
+
+<<<<<<< Updated upstream
+=======
+
+evals_df = pd.DataFrame(columns=["parent_asin", "rating"])
+
+
+@app.route("/api/v1/submit_evals", methods=["POST"])
+def submit_evals():
+    response = request.json
+    print("Received evals data:", response)
+
+    try:
+        global evals_df
+
+        new_rows = pd.DataFrame(
+            [
+                {"parent_asin": asin, "rating": float(rating)}
+                for asin, rating in response.items()
+            ]
+        )
+
+        evals_df = pd.concat([evals_df, new_rows], ignore_index=True)
+
+        print("\nEvals DataFrame:")
+        print(evals_df)
+        print("storing evals df for day/time")
+        evals_df.to_csv
+        evals_df.to_csv(
+            f'../data/user_evals/{time.strftime("%Y%m%d-%H%M%S")}.csv', index=False
+        )
+        print("resetting evals df")
+        evals_df = pd.DataFrame(columns=["parent_asin", "rating"])
+
+    except Exception as e:
+        print("Error:", e)
+        return {
+            "status": "failure",
+            "status_code": 500,
+            "message": "Failed to store evals in DataFrame",
+            "error": str(e),
+        }
+
+    return {
+        "status": "success",
+        "status_code": 200,
+        "message": "Evals data stored in DataFrame",
     }
 
 
+@app.route("/api/v1/get_recs", methods=["GET"])
+def get_recs():
+    try:
+        global user_df
+        print("Getting recommendations...")
+        print("from front end:", user_df)
+        recs = rec_engine.get_recommendations(user_df)
+        rec_asins = [rec[0] for rec in recs]
+        print("Recommended ASINs:", rec_asins)
+        print("getting recommended product details")
+        df_recs = all_products_cleaned[
+            all_products_cleaned["parent_asin"].isin(rec_asins)
+        ]
+
+        recommendations = df_recs.to_dict(orient="records")
+        print("Recommendations retrieved successfully.")
+        print("resetting user ratings")
+        user_df = pd.DataFrame(columns=["parent_asin", "rating"])
+
+        return jsonify(
+            {"status": "success", "status_code": 200, "data": recommendations}
+        )
+
+    except Exception as e:
+        print("Error:", e)
+        return {
+            "status": "failure",
+            "status_code": 500,
+            "message": "Failed to store data in DataFrame",
+            "error": str(e),
+        }
+
+>>>>>>> Stashed changes
+
 @app.teardown_appcontext
 def close_connection(exception):
-    db = getattr(g, '_database', None)
+    db = getattr(g, "_database", None)
     if db is not None:
         db.close()
 
 
+<<<<<<< Updated upstream
 if __name__ == '__main__':
     app.run(debug=True)
+=======
+if __name__ == "__main__":
+    app.run(debug=False)
+>>>>>>> Stashed changes
