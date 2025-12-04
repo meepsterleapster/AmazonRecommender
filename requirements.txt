@@ -5,3 +5,7 @@ pandas>=2.3.3
 pymongo>=4.15.4
 python-dotenv>=1.2.1
 scikit-learn>=1.7.2
+seaborn>=0.13.0
+matplotlib>=3.9.0
+scipy>=1.14.0
+flask>=3.0.0
