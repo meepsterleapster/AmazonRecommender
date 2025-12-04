@@ -1,13 +1,10 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify, g
 import pandas as pd
 import sqlite3, os
-<<<<<<< Updated upstream
-=======
 
 from src import rec_engine
 
 import time
->>>>>>> Stashed changes
 
 DATABASE = "../data/amazon.db"
 
@@ -49,17 +46,6 @@ def query_db(query, args=(), action="get"):
     return response
 
 
-<<<<<<< Updated upstream
-user_df = pd.DataFrame(columns=[
-    "firstname",
-    "lastname",
-    "goal",
-    "age",
-    "experience",
-    "style",
-    "time_commitment"
-])
-=======
 def load_dfs():
     global samples_clean
     all_samples = pd.read_csv("../data/amazon_product_samples.csv")
@@ -97,7 +83,6 @@ def get_samples():
                 "error": str(e),
             }
         )
->>>>>>> Stashed changes
 
 
 user_df = pd.DataFrame(columns=["parent_asin", "rating"])
@@ -110,11 +95,6 @@ def submit_form():
 
     try:
         global user_df
-<<<<<<< Updated upstream
-        
-        new_row = pd.DataFrame([response])
-        user_df = pd.concat([user_df, new_row], ignore_index=True)
-=======
 
         new_rows = pd.DataFrame(
             [
@@ -124,7 +104,6 @@ def submit_form():
         )
 
         user_df = pd.concat([user_df, new_rows], ignore_index=True)
->>>>>>> Stashed changes
 
         print("\nCurrent DataFrame:")
         print(user_df)
@@ -144,8 +123,6 @@ def submit_form():
         "message": "Form data stored in DataFrame",
     }
 
-<<<<<<< Updated upstream
-=======
 
 evals_df = pd.DataFrame(columns=["parent_asin", "rating"])
 
@@ -225,7 +202,6 @@ def get_recs():
             "error": str(e),
         }
 
->>>>>>> Stashed changes
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -234,10 +210,5 @@ def close_connection(exception):
         db.close()
 
 
-<<<<<<< Updated upstream
-if __name__ == '__main__':
-    app.run(debug=True)
-=======
 if __name__ == "__main__":
     app.run(debug=False)
->>>>>>> Stashed changes
